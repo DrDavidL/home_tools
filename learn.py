@@ -1,29 +1,29 @@
-import json
-import time
-import openai
-import os
+# import json
+# import time
+# import openai
+# import os
 import streamlit as st
-from langchain.utilities import DuckDuckGoSearchAPIWrapper
-import requests
-import time
+# from langchain.utilities import DuckDuckGoSearchAPIWrapper
+# import requests
+# import time
 # from retrying import retry
 from prompts import *
 import os 
-from io import StringIO, BytesIO
-from langchain.document_loaders import PyMuPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import Chroma
+# from io import StringIO, BytesIO
+# from langchain.document_loaders import PyMuPDFLoader
+# from langchain.text_splitter import RecursiveCharacterTextSplitter
+# from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
-from langchain.chat_models import ChatOpenAI
-from langchain.chains import RetrievalQA
-from langchain.chains.question_answering import load_qa_chain
+# from langchain.chat_models import ChatOpenAI
+# from langchain.chains import RetrievalQA
+# from langchain.chains.question_answering import load_qa_chain
 from langchain.vectorstores import FAISS
-from langchain.callbacks import get_openai_callback
+# from langchain.callbacks import get_openai_callback
 # from langchain.llms import OpenAI
 import streamlit as st
 from prompts import *
 # import fitz
-from io import StringIO      
+# from io import StringIO      
 from openai import OpenAI
 
 
@@ -42,23 +42,23 @@ with st.expander('Important Disclaimer'):
     
 
     
-@st.cache_data
-def create_retriever(texts, name, save_vectorstore=False):
+# @st.cache_data
+# def create_retriever(texts, name, save_vectorstore=False):
     
-    embeddings = OpenAIEmbeddings(model = "text-embedding-ada-002",
-                                  openai_api_base = "https://api.openai.com/v1/",
-                                  openai_api_key = st.secrets['OPENAI_API_KEY']
-                                  )
-    try:
-        vectorstore = FAISS.from_texts(texts, embeddings)
-        if save_vectorstore:
-            vectorstore.save_local(f"{name}.faiss")
-    except (IndexError, ValueError) as e:
-        st.error(f"Error creating vectorstore: {e}")
-        return
-    retriever = vectorstore.as_retriever(k=5)
+#     embeddings = OpenAIEmbeddings(model = "text-embedding-ada-002",
+#                                   openai_api_base = "https://api.openai.com/v1/",
+#                                   openai_api_key = st.secrets['OPENAI_API_KEY']
+#                                   )
+#     try:
+#         vectorstore = FAISS.from_texts(texts, embeddings)
+#         if save_vectorstore:
+#             vectorstore.save_local(f"{name}.faiss")
+#     except (IndexError, ValueError) as e:
+#         st.error(f"Error creating vectorstore: {e}")
+#         return
+#     retriever = vectorstore.as_retriever(k=5)
 
-    return retriever
+#     return retriever
 
 def update_messages(messages, system_content=None, assistant_content=None, user_content=None):
     """
@@ -158,53 +158,53 @@ def check_password():
         # Password correct.
         return True  
     
-def set_llm_chat(model, temperature):
-    if model == "openai/gpt-3.5-turbo":
-        model = "gpt-3.5-turbo"
-    if model == "openai/gpt-3.5-turbo-16k":
-        model = "gpt-3.5-turbo-16k"
-    if model == "openai/gpt-4":
-        model = "gpt-4"
-    if model == "gpt-4" or model == "gpt-3.5-turbo" or model == "gpt-3.5-turbo-16k":
-        return ChatOpenAI(model=model, openai_api_base = "https://api.openai.com/v1/", openai_api_key = st.secrets["OPENAI_API_KEY"], temperature=temperature)
-    else:
-        headers={ "HTTP-Referer": "https://fsm-gpt-med-ed.streamlit.app", # To identify your app
-          "X-Title": "GPT and Med Ed"}
-        return ChatOpenAI(model = model, openai_api_base = "https://openrouter.ai/api/v1", openai_api_key = st.secrets["OPENROUTER_API_KEY"], temperature=temperature, max_tokens = 500, headers=headers)
+# def set_llm_chat(model, temperature):
+#     if model == "openai/gpt-3.5-turbo":
+#         model = "gpt-3.5-turbo"
+#     if model == "openai/gpt-3.5-turbo-16k":
+#         model = "gpt-3.5-turbo-16k"
+#     if model == "openai/gpt-4":
+#         model = "gpt-4"
+#     if model == "gpt-4" or model == "gpt-3.5-turbo" or model == "gpt-3.5-turbo-16k":
+#         return ChatOpenAI(model=model, openai_api_base = "https://api.openai.com/v1/", openai_api_key = st.secrets["OPENAI_API_KEY"], temperature=temperature)
+#     else:
+#         headers={ "HTTP-Referer": "https://fsm-gpt-med-ed.streamlit.app", # To identify your app
+#           "X-Title": "GPT and Med Ed"}
+#         return ChatOpenAI(model = model, openai_api_base = "https://openrouter.ai/api/v1", openai_api_key = st.secrets["OPENROUTER_API_KEY"], temperature=temperature, max_tokens = 500, headers=headers)
 
-@st.cache_data  # Updated decorator name from cache_data to cache
-def load_docs(files):
-    all_text = ""
-    for file in files:
-        file_extension = os.path.splitext(file.name)[1]
-        if file_extension == ".pdf":
-            pdf_data = file.read()  # Read the file into bytes
-            pdf_reader = fitz.open("pdf", pdf_data)  # Open the PDF from bytes
-            text = ""
-            for page in pdf_reader:
-                text += page.get_text()
-            all_text += text
+# @st.cache_data  # Updated decorator name from cache_data to cache
+# def load_docs(files):
+#     all_text = ""
+#     for file in files:
+#         file_extension = os.path.splitext(file.name)[1]
+#         if file_extension == ".pdf":
+#             pdf_data = file.read()  # Read the file into bytes
+#             pdf_reader = fitz.open("pdf", pdf_data)  # Open the PDF from bytes
+#             text = ""
+#             for page in pdf_reader:
+#                 text += page.get_text()
+#             all_text += text
 
-        elif file_extension == ".txt":
-            stringio = StringIO(file.getvalue().decode("utf-8"))
-            text = stringio.read()
-            all_text += text
-        else:
-            st.warning('Please provide txt or pdf.', icon="⚠️")
-    return all_text 
+#         elif file_extension == ".txt":
+#             stringio = StringIO(file.getvalue().decode("utf-8"))
+#             text = stringio.read()
+#             all_text += text
+#         else:
+#             st.warning('Please provide txt or pdf.', icon="⚠️")
+#     return all_text 
 
-@st.cache_data
-def split_texts(text, chunk_size, overlap, split_method):
+# @st.cache_data
+# def split_texts(text, chunk_size, overlap, split_method):
 
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size, chunk_overlap=overlap)
+#     text_splitter = RecursiveCharacterTextSplitter(
+#         chunk_size=chunk_size, chunk_overlap=overlap)
 
-    splits = text_splitter.split_text(text)
-    if not splits:
-        # st.error("Failed to split document")
-        st.stop()
+#     splits = text_splitter.split_text(text)
+#     if not splits:
+#         # st.error("Failed to split document")
+#         st.stop()
 
-    return splits
+#     return splits
 
 
 if "current_thread" not in st.session_state:
