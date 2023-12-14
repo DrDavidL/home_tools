@@ -106,7 +106,7 @@ def answer_using_prefix(prefix, sample_question, sample_answer, my_ask, temperat
         api_key=api_key,
     )
     params = {
-        "model": "gpt-3.5-turbo-1106",
+        "model": "gpt-4-1106-preview",
         "messages": messages,
         "temperature": temperature,
         "stream": True,
