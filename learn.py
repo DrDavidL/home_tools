@@ -67,10 +67,10 @@ def gen_response(messages, temperature, model, print = True):
     except Exception as e:
         st.write(e)
         st.write(f'Here were the params: {params}')
-        return None
-
-    placeholder = st.empty()
-    full_response = ''
+        return None        
+    with st.chat_message("assistant"):
+        placeholder = st.empty()
+    full_response = '' 
     for chunk in completion:
         if chunk.choices[0].delta.content is not None:
             full_response += chunk.choices[0].delta.content
@@ -207,14 +207,18 @@ if check_password():
     model = st.sidebar.selectbox("Select a model", ["gpt-4-1106-preview", "gpt-3.5-turbo-1106", ])
     
     name = st.text_input("Please enter your first name:")
-    user_input = st.text_input("Your input here, ask to be tough, ask for test questions, submit your responses, etc.:")    
+    if st.session_state.message_thread == []:
+        st.warning("Enter your request at the bottom of the page.")
+    user_input = st.chat_input("Your input goes here, ask to teach or for test questions, submit your responses, etc.:")    
     system_context = bio_tutor.format(name = name, outline = biology_outline)
     if st.session_state.message_thread == []:
         st.session_state.message_thread = [{"role": "system", "content": system_context}]
         
 
-    if st.button("Learn about biology!"):
+    if user_input:
         st.session_state.message_thread.append({"role": "user", "content": user_input})
+        with st.chat_message("user"):
+            st.markdown(user_input)
         with st.spinner("Thinking..."): 
             answer_for_learner = gen_response(messages = st.session_state.message_thread, temperature = st.session_state.temp, model = model, print = True)
         st.session_state.tutor_user_topic.append(f'{name}: {user_input}')
