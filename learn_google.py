@@ -11,14 +11,47 @@ import textwrap
 
 import google.generativeai as genai
 
+def generate_prompt(message_list):
+    """
+    This function takes a list of dictionaries and generates a single string that can be used as a prompt for the Language Model.
+    
+    Args:
+    message_list (list): A list of dictionaries. Each dictionary has keys 'role' and 'content'.
+    
+    Returns:
+    str: A string that can be used as a prompt for the Language Model.
+    """
+    # Initialize an empty string to store the prompt
+    prompt = """You are now engaging in a real-time conversation thread. Your role is the 'assistant'. The 'system' prompt sets the 
+    rules for your interaction. Respond as if you are the assistant, directly addressing the most recent query from the 'user'. Do 
+    not preface your response with your role. Periodically include the user's name if you have it. Begin the conversation immediately. 
+    Here is the conversation thread: \n"""
+    
+    # Iterate over the list of dictionaries
+    for message in message_list:
+        # Add the 'role' and 'content' of each dictionary to the prompt string
+        prompt += f"<{message['role'].upper()}> {message['content']} \n"
+        
+    return prompt
 
 
-def gen_response_google(messages, temperature, model, print = True):
+
+def gen_response_google(messages, temperature, model, stream = True):
+    prompt = generate_prompt(messages)
     GOOGLE_API_KEY=st.secrets['GOOGLE_API_KEY']
     genai.configure(api_key=GOOGLE_API_KEY)
     model = genai.GenerativeModel('gemini-pro')
-    response = model.generate_content(str(messages))
-    st.markdown(response.text)
+    response = model.generate_content(prompt, stream = stream)
+    with st.chat_message("assistant"):
+        placeholder = st.empty()
+    full_response = ''
+    for chunk in response:
+        if chunk.text is not None:
+            full_response += chunk.text
+            # full_response.append(chunk.choices[0].delta.content)
+            placeholder.markdown(full_response)
+    placeholder.markdown(full_response)    
+    return response.text
     
 
 def gen_response(messages, temperature, model, print = True):
@@ -147,18 +180,19 @@ def main():
         name = st.text_input("Please enter your first name:")
         if st.session_state.message_thread == []:
             st.warning("Enter your request at the bottom of the page.")
-        user_input = st.chat_input("Your input goes here, ask to teach or for test questions, submit your responses, etc.:")    
-        system_context = bio_tutor.format(name = name, outline = biology_outline)
+        user_input = st.chat_input("Your input goes here, ask to teach or for test questions, submit your responses, etc.:")
+        full_user_input = f"{name}: {user_input}"
+        system_context = bio_tutor.format(outline = biology_outline)
         if st.session_state.message_thread == []:
             st.session_state.message_thread = [{"role": "system", "content": system_context}]
             
 
         if user_input:
-            st.session_state.message_thread.append({"role": "user", "content": user_input})
+            st.session_state.message_thread.append({"role": "user", "content": full_user_input})
             with st.chat_message("user"):
                 st.markdown(user_input)
             with st.spinner("Thinking..."): 
-                answer_for_learner = gen_response_google(messages = st.session_state.message_thread, temperature = st.session_state.temp, model = model, print = True)
+                answer_for_learner = gen_response_google(messages = st.session_state.message_thread, temperature = st.session_state.temp, model = model, stream = True)
             st.session_state.tutor_user_topic.append(f'{name}: {user_input}')
             st.session_state.tutor_user_answer.append(answer_for_learner)        
             st.session_state.message_thread.append({"role": "assistant", "content": answer_for_learner})

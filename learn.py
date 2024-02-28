@@ -6,6 +6,41 @@ from langchain.vectorstores import FAISS
 import streamlit as st
 from prompts import * 
 from openai import OpenAI
+import requests
+
+def realtime_search(query, domains, max):
+    url = "https://real-time-web-search.p.rapidapi.com/search"
+    
+    # Combine domains and query
+    full_query = f"{domains} {query}"
+    querystring = {"q": full_query, "limit": max}
+
+    headers = {
+        "X-RapidAPI-Key": config["X_RapidAPI_Key"],
+        "X-RapidAPI-Host": "real-time-web-search.p.rapidapi.com",
+    }
+
+    urls = []
+    snippets = []
+
+    try:
+        response = requests.get(url, headers=headers, params=querystring)
+        
+        # Check if the request was successful
+        if response.status_code == 200:
+            response_data = response.json()
+            for item in response_data.get('data', []):
+                urls.append(item.get('url'))   
+                snippets.append(f"{item.get('title')} {item.get('snippet')} {item.get('url')} <END OF SITE>")
+        else:
+            st.error(f"Search failed with status code: {response.status_code}")
+            return [], []
+
+    except requests.exceptions.RequestException as e:
+        st.error(f"RapidAPI real-time search failed to respond: {e}")
+        return [], []
+
+    return snippets, urls
 
 def gen_response(messages, temperature, model, print = True):
     api_key = st.secrets["OPENAI_API_KEY"]
