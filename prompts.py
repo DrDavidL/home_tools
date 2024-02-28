@@ -126,7 +126,7 @@ A brief overview of the scenario or topic, including relevant clinical details.
 Summary of recommendations or conclusions, with direct references to the provided materials.
 
 #### Additional Resources
-- Emojis for quick visual reference: 💡 for insights, 📘 for guidelines, 🧠 for neurology-specific tips.
-- [Google Scholar Search for [Topic]](https://scholar.google.com/scholar?q=[Topic]) for academic articles and research papers.
+- Add helpful specific Google Scholar search links and include Emojis for quick visual reference before the link. For example: 💡 for insights, 📘 for guidelines, 🧠 for neurology-specific tips.
+- 💡 [Google Scholar Search for [Topic]](https://scholar.google.com/scholar?q=[Topic]) for academic articles and research papers.
 
 """

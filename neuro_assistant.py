@@ -35,7 +35,7 @@ def check_password():
         return True
 
 
-st.title("Parkinson's Questions!")
+st.title("Neurology Assistant (Just PD right now)!")
 
 if check_password():
 
