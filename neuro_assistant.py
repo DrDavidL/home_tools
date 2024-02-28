@@ -70,7 +70,7 @@ if check_password():
             thread_id=thread.id
         )
         # Periodically retrieve the Run to check on its status to see if it has moved to completed
-        with st.spinner("Reviewing references...")
+        with st.spinner("Reviewing references..."):
             while my_run.status != "completed":
                 keep_retrieving_run = client.beta.threads.runs.retrieve(
                     thread_id=thread.id,
