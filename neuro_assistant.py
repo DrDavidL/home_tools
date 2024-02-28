@@ -51,7 +51,7 @@ if check_password():
 
     # Add a message to the thread
     my_name = st.text_input("What is your name?")
-    my_question = st.text_input("What is your question about PD?")
+    my_question = st.text_input("What is your question? ")
     message = client.beta.threads.messages.create(
         thread_id=thread.id,
         role="user",
@@ -63,26 +63,27 @@ if check_password():
         my_run = client.beta.threads.runs.create(
             thread_id=thread.id,
             assistant_id=my_assistant.id,
-            instructions=bio_tutor,
+            instructions=neurologist,
             )
         
         messages = client.beta.threads.messages.list(
             thread_id=thread.id
         )
         # Periodically retrieve the Run to check on its status to see if it has moved to completed
-        while my_run.status != "completed":
-            keep_retrieving_run = client.beta.threads.runs.retrieve(
-                thread_id=thread.id,
-                run_id=my_run.id
-            )
-            # st.write(f"Run status: {keep_retrieving_run.status}")
+        with st.spinner("Reviewing references...")
+            while my_run.status != "completed":
+                keep_retrieving_run = client.beta.threads.runs.retrieve(
+                    thread_id=thread.id,
+                    run_id=my_run.id
+                )
+                # st.write(f"Run status: {keep_retrieving_run.status}")
 
-            if keep_retrieving_run.status == "completed":
-                # print("\n")
-                break
-        all_messages = client.beta.threads.messages.list(
-        thread_id=thread.id
-        )
+                if keep_retrieving_run.status == "completed":
+                    # print("\n")
+                    break
+            all_messages = client.beta.threads.messages.list(
+            thread_id=thread.id
+            )
 
         with st.chat_message("user"):
             st.write(my_question)
