@@ -50,12 +50,14 @@ if check_password():
     thread = client.beta.threads.create()
 
     # Add a message to the thread
-    my_name = st.text_input("What is your name?")
+    my_role = st.radio("What is your role?", ["patient", "neurologist", "other"], horizontal=True)
+    if my_role == "other":
+        my_role = st.text_input("What is your role? ")
     my_question = st.text_input("What is your question? ")
     message = client.beta.threads.messages.create(
         thread_id=thread.id,
         role="user",
-        content=f'user_name: {my_name} Question: {my_question}'
+        content=f'I am a: {my_role} My question is: {my_question}'
     )
 
     # Run the assistant
