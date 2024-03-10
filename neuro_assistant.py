@@ -34,8 +34,11 @@ def check_password():
         # Password correct.
         return True
 
+if 'pending_question' not in st.session_state:
+    st.session_state['pending_question'] = ''
 
-st.title("Neurology Assistant (Just PD right now)!")
+st.title("Neurology Assistant")
+st.info("This covers only Parkinson's Disease as an example using NLM Bookshelf references.")
 
 if check_password():
 
@@ -53,15 +56,48 @@ if check_password():
     my_role = st.radio("What is your role?", ["patient", "neurologist", "other"], horizontal=True)
     if my_role == "other":
         my_role = st.text_input("What is your role? ")
-    my_question = st.text_input("What is your question? ")
-    message = client.beta.threads.messages.create(
-        thread_id=thread.id,
-        role="user",
-        content=f'I am a: {my_role} My question is: {my_question}'
-    )
+    
+    suggested_patient_questions = [
+        "Ask your own question",
+        "I have a tongue tremor; is that common with PD?",
+        "What is best early treatment for PD; I just got diagnosed",
+        "I had a DAT scan for tremor and its normal, but doctor thought it was PD, what is the cause of my tremor?",
+        "I heard about deep brain stimulation and want to know if I should get that treatment for Parkinson’s disease",
+    ]
+    suggested_neurologist_questions = [
+        "Ask your own question",
+        "Generate patient instructions for a patient with Parkinson’s disease who is going to be admitted to the hospital for an elective surgery.",
+        "Provide guidance on precautions to minimize risk in patients with PD who are hospitalized."
+    ]    
+    
+    if my_role == "patient":
+        selected_question = st.radio("", suggested_patient_questions)
+        
+    if my_role == "neurologist":
+        selected_question = st.radio("", suggested_neurologist_questions)
+        
+    if selected_question != "Ask your own question":
+        st.session_state.pending_question = selected_question
+    
+    if selected_question == "Ask your own question":
+        
+        my_question = st.text_input("What is your question?")
+        st.session_state.pending_question = my_question
+
+    
+    # message = client.beta.threads.messages.create(
+    #     thread_id=thread.id,
+    #     role="user",
+    #     content=f'I am a: {my_role} My question is: {my_question}'
+    # )
 
     # Run the assistant
     if st.button("Ask your question!"):
+        message = client.beta.threads.messages.create(
+            thread_id=thread.id,
+            role="user",
+            content=f'I am a: {my_role} My question is: {st.session_state.pending_question}'
+        )
         my_run = client.beta.threads.runs.create(
             thread_id=thread.id,
             assistant_id=my_assistant.id,
@@ -88,7 +124,7 @@ if check_password():
             )
 
         with st.chat_message("user"):
-            st.write(my_question)
+            st.write(st.session_state.pending_question)
             
         with st.chat_message("assistant"):
             st.write(all_messages.data[0].content[0].text.value)
