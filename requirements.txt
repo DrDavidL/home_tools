@@ -28,7 +28,7 @@ jsonschema==4.20.0
 jsonschema-specifications==2023.11.2
 langchain==0.0.350
 langchain-community==0.0.3
-langchain-core==0.1.0
+langchain-core==0.1.34
 langsmith==0.0.70
 markdown-it-py==3.0.0
 MarkupSafe==2.1.3
